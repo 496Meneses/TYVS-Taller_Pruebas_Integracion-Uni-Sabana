@@ -3,7 +3,7 @@
 Sistema de Gestion de Pedidos de Libreria implementado con Clean Architecture, Spring Boot y H2.  
 Curso: Testing y Validacion de Software — Universidad de La Sabana.
 
-**Integrantes:** Carlos Meneses P. — David Monsalve — Andres Meneses
+**Integrantes:** David Monsalve — Andres Meneses
 
 ## Descripcion del sistema
 
