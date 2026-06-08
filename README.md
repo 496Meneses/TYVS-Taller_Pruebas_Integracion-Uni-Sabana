@@ -15,11 +15,31 @@ API REST que permite gestionar el catalogo de libros y los pedidos de clientes. 
 El proyecto sigue Clean Architecture con cuatro capas:
 
 ```
-domain/model/          Entidades: Book, Order, OrderStatus, OrderResult
-application/port/out/  Interfaces de repositorio (puertos de salida)
-application/usecase/   Logica de negocio: BookService, OrderService
-infrastructure/        Implementacion JDBC con JdbcTemplate sobre H2
-delivery/rest/         Controladores REST: BookController, OrderController
+┌──────────────────────────────────────────────────┐
+│              delivery/rest                        │
+│   BookController          OrderController         │
+│   (HTTP in, HTTP out — depende de use cases)      │
+└──────────────┬───────────────────────────────────┘
+               │ llama
+┌──────────────▼───────────────────────────────────┐
+│           application/usecase                     │
+│   BookService             OrderService            │
+│   (logica de negocio — solo interfaces)           │
+└──────────────┬───────────────────────────────────┘
+               │ depende de (puerto de salida)
+┌──────────────▼───────────────────────────────────┐
+│         application/port/out                      │
+│   BookRepositoryPort      OrderRepositoryPort     │
+│   (contratos — el dominio no sabe de la BD)       │
+└──────────────┬───────────────────────────────────┘
+               │ implementa
+┌──────────────▼───────────────────────────────────┐
+│           infrastructure/persistence              │
+│   H2BookRepository        H2OrderRepository       │
+│   (JdbcTemplate + H2 en memoria)                  │
+└──────────────────────────────────────────────────┘
+
+domain/model/   Book, Order, OrderStatus, OrderResult (entidades puras)
 ```
 
 La capa de aplicacion no conoce Spring ni H2; depende unicamente de interfaces, lo que permite sustituir la persistencia sin tocar la logica de negocio.
@@ -76,6 +96,68 @@ Todas las pruebas siguen el patron **Arrange-Act-Assert (AAA)**.
 - Rechazo por estado invalido (pedido ya confirmado o ya cancelado)
 - Validaciones de entrada: nombre nulo/en blanco, cantidad <= 0
 
+### Ejemplo de prueba unitaria con Mockito
+
+```java
+@RunWith(MockitoJUnitRunner.class)
+public class OrderServiceUnitTest {
+
+    @Mock private OrderRepositoryPort orderRepo;
+    @Mock private BookRepositoryPort  bookRepo;
+
+    private OrderService orderService;
+
+    @Before
+    public void setUp() {
+        orderService = new OrderService(orderRepo, bookRepo);
+    }
+
+    @Test
+    public void shouldReduceExactQuantityFromStockOnSuccess() {
+        // Arrange
+        Book book = new Book(1, "Test", "Author", 10.0, 8, true);
+        when(bookRepo.findById(1)).thenReturn(Optional.of(book));
+        when(orderRepo.save(any(Order.class))).thenReturn(1);
+
+        // Act
+        orderService.placeOrder(1, "Cliente", 3);
+
+        // Assert — stock reducido exactamente en 3 (8 - 3 = 5)
+        verify(bookRepo, times(1)).updateStock(1, 5);
+    }
+}
+```
+
+### Ejemplo de prueba de sistema con MockMvc
+
+```java
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+public class BookControllerIT {
+
+    @Autowired private MockMvc mockMvc;
+    @Autowired private BookRepositoryPort bookRepo;
+
+    @Before
+    public void cleanDatabase() {
+        bookRepo.deleteAll();
+    }
+
+    @Test
+    public void shouldReturn200WhenAddingValidBook() throws Exception {
+        // Arrange
+        String body = "{\"id\":1,\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\","
+                    + "\"price\":45.0,\"stock\":10,\"available\":true}";
+        // Act & Assert
+        mockMvc.perform(post("/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+               .andExpect(status().isOk());
+    }
+}
+```
+
 ### Configuracion de pruebas
 
 Las pruebas unitarias y de integracion sin Spring crean su propio `JdbcDataSource` con una base H2 nombrada independiente (`mem:bookservicetest`, `mem:orderservicetest`), garantizando aislamiento entre suites.
@@ -95,6 +177,19 @@ Herramienta: JaCoCo 0.8.11
 | Cobertura de clases | - | 100% |
 
 Las clases excluidas del analisis son los DTOs Lombok (`domain/model/**`) y la clase principal de Spring Boot (`ProyectoApplication`), ya que no contienen logica de negocio verificable.
+
+### Lineas no cubiertas y justificacion
+
+El 4% de instrucciones no cubiertas y el 11% de ramas no cubiertas se concentran en:
+
+| Clase | Lineas / ramas sin cubrir | Justificacion |
+|-------|--------------------------|---------------|
+| `H2BookRepository` | Rama de excepcion en `findById` cuando el ResultSet esta vacio pero la query no lanza excepcion | La ruta de error de JdbcTemplate requiere simular un fallo de BD que H2 en memoria nunca produce normalmente |
+| `H2OrderRepository` | Rama del `GeneratedKeyHolder` cuando la insercion no genera clave | Comportamiento interno de JDBC; imposible simular sin mockear el driver |
+| `BookController` | Rama `else` implícita en la respuesta 404 de `getBook` cuando el Optional ya fue evaluado | Cubierta logicamente por `shouldReturn404WhenBookNotFound` en `BookControllerIT`, JaCoCo reporta la rama del operador ternario como parcial |
+| `OrderController` | Mismo patron que BookController en `getOrder` y `placeOrder` | Idem |
+
+Estas ramas no cubiertas no representan riesgos funcionales: las reglas de negocio estan completamente cubiertas en la capa de `application/usecase`.
 
 El reporte HTML completo se genera en `target/site/jacoco/index.html` al ejecutar `mvn verify`.
 
