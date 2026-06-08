@@ -87,10 +87,12 @@ Las pruebas de sistema usan `@SpringBootTest` + `@AutoConfigureMockMvc` con la b
 
 Herramienta: JaCoCo 0.8.11
 
-| Metrica | Minimo requerido | Estado |
-|---------|-----------------|--------|
-| Cobertura de lineas | 75% | Cumplido |
-| Cobertura de ramas | 70% | Cumplido |
+| Metrica | Minimo requerido | Resultado obtenido |
+|---------|-----------------|-------------------|
+| Cobertura de instrucciones | 75% | 96% |
+| Cobertura de ramas | 70% | 89% |
+| Cobertura de metodos | - | 97% |
+| Cobertura de clases | - | 100% |
 
 Las clases excluidas del analisis son los DTOs Lombok (`domain/model/**`) y la clase principal de Spring Boot (`ProyectoApplication`), ya que no contienen logica de negocio verificable.
 
