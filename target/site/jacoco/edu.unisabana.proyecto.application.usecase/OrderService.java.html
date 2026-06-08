@@ -22,8 +22,8 @@ public class OrderService {
 <span class="fc" id="L22">    }</span>
 
     public OrderResult placeOrder(int bookId, String customerName, int quantity) {
-<span class="pc bpc" id="L25" title="3 of 6 branches missed.">        if (customerName == null || customerName.isBlank() || quantity &lt;= 0) {</span>
-<span class="nc" id="L26">            throw new IllegalArgumentException(&quot;Datos del pedido inválidos&quot;);</span>
+<span class="fc bfc" id="L25" title="All 6 branches covered.">        if (customerName == null || customerName.isBlank() || quantity &lt;= 0) {</span>
+<span class="fc" id="L26">            throw new IllegalArgumentException(&quot;Datos del pedido inválidos&quot;);</span>
         }
 <span class="fc" id="L28">        Optional&lt;Book&gt; bookOpt = bookRepo.findById(bookId);</span>
 <span class="fc bfc" id="L29" title="All 2 branches covered.">        if (bookOpt.isEmpty()) {</span>
@@ -53,8 +53,8 @@ public class OrderService {
 
     public OrderResult cancelOrder(int orderId) {
 <span class="fc" id="L55">        Optional&lt;Order&gt; orderOpt = orderRepo.findById(orderId);</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (orderOpt.isEmpty()) {</span>
-<span class="nc" id="L57">            return OrderResult.NOT_FOUND;</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (orderOpt.isEmpty()) {</span>
+<span class="fc" id="L57">            return OrderResult.NOT_FOUND;</span>
         }
 <span class="fc bfc" id="L59" title="All 2 branches covered.">        if (orderOpt.get().getStatus() == OrderStatus.CANCELLED) {</span>
 <span class="fc" id="L60">            return OrderResult.INVALID_STATUS;</span>
