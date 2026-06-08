@@ -3,8 +3,8 @@ TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.domain.model,Orde
 TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.domain.model,OrderStatus,0,21,0,0,0,4,0,1,0,1
 TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.infrastructure.persistence,H2BookRepository,0,160,1,7,0,28,1,11,0,8
 TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.infrastructure.persistence,H2OrderRepository,1,131,1,3,0,28,1,9,0,8
-TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.application.usecase,BookService,5,62,3,9,1,15,3,7,0,4
-TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.application.usecase,OrderService,7,116,4,16,2,29,4,11,0,5
+TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.application.usecase,BookService,0,67,1,11,0,16,1,9,0,4
+TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.application.usecase,OrderService,0,123,0,20,0,31,0,15,0,5
 TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto,ProyectoApplication,5,3,0,0,2,1,1,1,1,1
 TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.delivery.rest,BookController,6,54,0,0,2,15,0,4,0,4
 TYVS - Proyecto Pruebas de Integración,edu.unisabana.proyecto.delivery.rest,OrderController,16,76,3,9,5,22,2,9,0,5

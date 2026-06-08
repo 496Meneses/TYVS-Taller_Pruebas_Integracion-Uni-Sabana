@@ -124,6 +124,38 @@ Resumen:
 | DEF-003 | Confirmar pedido cancelado retorna 400 en lugar de 409 | Abierto |
 
 
+## Evidencias del entregable
+
+### Script de pruebas automatizadas
+
+Estructura de pruebas por carpeta en el repositorio:
+
+![Scripts de pruebas](docs/01_scripts_pruebas.png)
+
+### Pipeline CI/CD funcional
+
+Ejecucion exitosa del workflow en GitHub Actions:
+
+![Pipeline CI/CD](docs/02_pipeline_exitoso.png)
+
+### Metricas de cubrimiento de codigo
+
+Reporte JaCoCo generado por el pipeline (96% instrucciones, 89% ramas):
+
+![Cobertura JaCoCo](docs/03_cobertura_jacoco.png)
+
+### Reporte de resultados de ejecucion
+
+Resumen de pruebas ejecutadas (64 pruebas, 0 fallos):
+
+![Resultados de pruebas](docs/04_resultados_pruebas.png)
+
+### Restriccion de integracion
+
+Branch ruleset activo que bloquea merges si el pipeline falla:
+
+![Branch Protection](docs/05_branch_protection.png)
+
 ## Conclusiones
 
 Las pruebas de integracion con H2 permitieron detectar los defectos DEF-001 y DEF-002 antes de que llegaran a las pruebas de sistema, reduciendo el costo de correccion. La separacion en tres niveles (unitarias, integracion, sistema) facilita identificar en que capa se origina cada falla.
