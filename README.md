@@ -3,15 +3,12 @@
 Sistema de Gestion de Pedidos de Libreria implementado con Clean Architecture, Spring Boot y H2.  
 Curso: Testing y Validacion de Software — Universidad de La Sabana.
 
-**Integrante:** Carlos Meneses P.
-
----
+**Integrantes:** Carlos Meneses P. — David Monsalve — Andres Meneses
 
 ## Descripcion del sistema
 
 API REST que permite gestionar el catalogo de libros y los pedidos de clientes. Un pedido solo puede crearse si el libro existe, esta disponible y tiene stock suficiente. Al confirmar o cancelar un pedido se valida el estado actual antes de actualizar.
 
----
 
 ## Arquitectura
 
@@ -27,7 +24,6 @@ delivery/rest/         Controladores REST: BookController, OrderController
 
 La capa de aplicacion no conoce Spring ni H2; depende unicamente de interfaces, lo que permite sustituir la persistencia sin tocar la logica de negocio.
 
----
 
 ## Ejecucion
 
@@ -44,7 +40,6 @@ mvn test
 target/site/jacoco/index.html
 ```
 
----
 
 ## Pruebas
 
@@ -87,7 +82,6 @@ Las pruebas unitarias y de integracion sin Spring crean su propio `JdbcDataSourc
 
 Las pruebas de sistema usan `@SpringBootTest` + `@AutoConfigureMockMvc` con la base `mem:testdb` definida en `src/test/resources/application.properties`. Cada clase limpia las tablas en `@Before` para garantizar independencia entre casos.
 
----
 
 ## Cobertura de codigo
 
@@ -102,7 +96,6 @@ Las clases excluidas del analisis son los DTOs Lombok (`domain/model/**`) y la c
 
 El reporte HTML completo se genera en `target/site/jacoco/index.html` al ejecutar `mvn verify`.
 
----
 
 ## Pipeline CI/CD
 
@@ -117,7 +110,6 @@ Los artefactos generados en cada ejecucion son:
 - `surefire-test-results`: resultados de pruebas unitarias e integracion
 - `failsafe-test-results`: resultados de pruebas de sistema
 
----
 
 ## Defectos identificados
 
@@ -131,7 +123,6 @@ Resumen:
 | DEF-002 | Libro con stock=0 permanecia marcado como disponible | Resuelto |
 | DEF-003 | Confirmar pedido cancelado retorna 400 en lugar de 409 | Abierto |
 
----
 
 ## Conclusiones
 
