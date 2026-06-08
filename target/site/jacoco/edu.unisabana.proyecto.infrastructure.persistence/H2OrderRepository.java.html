@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>H2OrderRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TYVS - Proyecto Pruebas de Integración</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.proyecto.infrastructure.persistence</a> &gt; <span class="el_source">H2OrderRepository.java</span></div><h1>H2OrderRepository.java</h1><pre class="source lang-java linenums">package edu.unisabana.proyecto.infrastructure.persistence;
+
+import edu.unisabana.proyecto.application.port.out.OrderRepositoryPort;
+import edu.unisabana.proyecto.domain.model.Order;
+import edu.unisabana.proyecto.domain.model.OrderStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
+
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Optional;
+
+@Component
+public class H2OrderRepository implements OrderRepositoryPort {
+
+    private final JdbcTemplate jdbc;
+
+<span class="fc" id="L22">    public H2OrderRepository(JdbcTemplate jdbc) {</span>
+<span class="fc" id="L23">        this.jdbc = jdbc;</span>
+<span class="fc" id="L24">        initSchema();</span>
+<span class="fc" id="L25">    }</span>
+
+    private void initSchema() {
+<span class="fc" id="L28">        jdbc.execute(</span>
+            &quot;CREATE TABLE IF NOT EXISTS orders (&quot; +
+            &quot;id INT AUTO_INCREMENT PRIMARY KEY, &quot; +
+            &quot;book_id INT NOT NULL, &quot; +
+            &quot;customer_name VARCHAR(255) NOT NULL, &quot; +
+            &quot;quantity INT NOT NULL, &quot; +
+            &quot;status VARCHAR(50) NOT NULL)&quot;
+        );
+<span class="fc" id="L36">    }</span>
+
+<span class="fc" id="L38">    private final RowMapper&lt;Order&gt; orderRowMapper = (rs, rowNum) -&gt; new Order(</span>
+<span class="fc" id="L39">        rs.getInt(&quot;id&quot;),</span>
+<span class="fc" id="L40">        rs.getInt(&quot;book_id&quot;),</span>
+<span class="fc" id="L41">        rs.getString(&quot;customer_name&quot;),</span>
+<span class="fc" id="L42">        rs.getInt(&quot;quantity&quot;),</span>
+<span class="fc" id="L43">        OrderStatus.valueOf(rs.getString(&quot;status&quot;))</span>
+    );
+
+    @Override
+    public int save(Order order) {
+<span class="fc" id="L48">        KeyHolder keyHolder = new GeneratedKeyHolder();</span>
+<span class="fc" id="L49">        jdbc.update(conn -&gt; {</span>
+<span class="fc" id="L50">            PreparedStatement ps = conn.prepareStatement(</span>
+                &quot;INSERT INTO orders (book_id, customer_name, quantity, status) VALUES (?, ?, ?, ?)&quot;,
+                Statement.RETURN_GENERATED_KEYS
+            );
+<span class="fc" id="L54">            ps.setInt(1, order.getBookId());</span>
+<span class="fc" id="L55">            ps.setString(2, order.getCustomerName());</span>
+<span class="fc" id="L56">            ps.setInt(3, order.getQuantity());</span>
+<span class="fc" id="L57">            ps.setString(4, order.getStatus().name());</span>
+<span class="fc" id="L58">            return ps;</span>
+        }, keyHolder);
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        return keyHolder.getKey() != null ? keyHolder.getKey().intValue() : -1;</span>
+    }
+
+    @Override
+    public Optional&lt;Order&gt; findById(int id) {
+<span class="fc" id="L65">        List&lt;Order&gt; results = jdbc.query(</span>
+<span class="fc" id="L66">            &quot;SELECT * FROM orders WHERE id = ?&quot;, orderRowMapper, id</span>
+        );
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));</span>
+    }
+
+    @Override
+    public void updateStatus(int id, OrderStatus status) {
+<span class="fc" id="L73">        jdbc.update(&quot;UPDATE orders SET status = ? WHERE id = ?&quot;, status.name(), id);</span>
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void deleteAll() {
+<span class="fc" id="L78">        jdbc.execute(&quot;TRUNCATE TABLE orders&quot;);</span>
+<span class="fc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

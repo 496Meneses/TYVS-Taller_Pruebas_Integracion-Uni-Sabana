@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TYVS - Proyecto Pruebas de Integración</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.proyecto.delivery.rest</a> &gt; <span class="el_source">OrderController.java</span></div><h1>OrderController.java</h1><pre class="source lang-java linenums">package edu.unisabana.proyecto.delivery.rest;
+
+import edu.unisabana.proyecto.application.usecase.OrderService;
+import edu.unisabana.proyecto.domain.model.Order;
+import edu.unisabana.proyecto.domain.model.OrderResult;
+import edu.unisabana.proyecto.domain.model.rq.OrderRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(&quot;/orders&quot;)
+public class OrderController {
+
+    private final OrderService orderService;
+
+<span class="fc" id="L16">    public OrderController(OrderService orderService) {</span>
+<span class="fc" id="L17">        this.orderService = orderService;</span>
+<span class="fc" id="L18">    }</span>
+
+    @PostMapping
+    public ResponseEntity&lt;String&gt; placeOrder(@RequestBody OrderRequest request) {
+        try {
+<span class="fc" id="L23">            OrderResult result = orderService.placeOrder(</span>
+<span class="fc" id="L24">                request.getBookId(), request.getCustomerName(), request.getQuantity()</span>
+            );
+<span class="fc bfc" id="L26" title="All 2 branches covered.">            if (result == OrderResult.CREATED) {</span>
+<span class="fc" id="L27">                return ResponseEntity.ok(&quot;CREATED&quot;);</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">            } else if (result == OrderResult.BOOK_NOT_FOUND) {</span>
+<span class="fc" id="L29">                return ResponseEntity.badRequest().body(&quot;BOOK_NOT_FOUND&quot;);</span>
+            } else {
+<span class="fc" id="L31">                return ResponseEntity.badRequest().body(&quot;OUT_OF_STOCK&quot;);</span>
+            }
+<span class="nc" id="L33">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L34">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+        }
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Order&gt; getOrder(@PathVariable int id) {
+<span class="fc" id="L40">        return orderService.getOrder(id)</span>
+<span class="fc" id="L41">            .map(ResponseEntity::ok)</span>
+<span class="fc" id="L42">            .orElse(ResponseEntity.notFound().build());</span>
+    }
+
+    @PutMapping(&quot;/{id}/confirm&quot;)
+    public ResponseEntity&lt;String&gt; confirmOrder(@PathVariable int id) {
+<span class="fc" id="L47">        OrderResult result = orderService.confirmOrder(id);</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (result == OrderResult.CONFIRMED) {</span>
+<span class="fc" id="L49">            return ResponseEntity.ok(&quot;CONFIRMED&quot;);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        } else if (result == OrderResult.NOT_FOUND) {</span>
+<span class="fc" id="L51">            return ResponseEntity.notFound().build();</span>
+        } else {
+<span class="fc" id="L53">            return ResponseEntity.badRequest().body(&quot;INVALID_STATUS&quot;);</span>
+        }
+    }
+
+    @PutMapping(&quot;/{id}/cancel&quot;)
+    public ResponseEntity&lt;String&gt; cancelOrder(@PathVariable int id) {
+<span class="fc" id="L59">        OrderResult result = orderService.cancelOrder(id);</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (result == OrderResult.CANCELLED) {</span>
+<span class="fc" id="L61">            return ResponseEntity.ok(&quot;CANCELLED&quot;);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        } else if (result == OrderResult.NOT_FOUND) {</span>
+<span class="nc" id="L63">            return ResponseEntity.notFound().build();</span>
+        } else {
+<span class="nc" id="L65">            return ResponseEntity.badRequest().body(&quot;INVALID_STATUS&quot;);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

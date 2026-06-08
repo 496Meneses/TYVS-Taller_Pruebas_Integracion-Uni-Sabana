@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>H2BookRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TYVS - Proyecto Pruebas de Integración</a> &gt; <a href="index.source.html" class="el_package">edu.unisabana.proyecto.infrastructure.persistence</a> &gt; <span class="el_source">H2BookRepository.java</span></div><h1>H2BookRepository.java</h1><pre class="source lang-java linenums">package edu.unisabana.proyecto.infrastructure.persistence;
+
+import edu.unisabana.proyecto.application.port.out.BookRepositoryPort;
+import edu.unisabana.proyecto.domain.model.Book;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+
+@Component
+public class H2BookRepository implements BookRepositoryPort {
+
+    private final JdbcTemplate jdbc;
+
+<span class="fc" id="L17">    public H2BookRepository(JdbcTemplate jdbc) {</span>
+<span class="fc" id="L18">        this.jdbc = jdbc;</span>
+<span class="fc" id="L19">        initSchema();</span>
+<span class="fc" id="L20">    }</span>
+
+    private void initSchema() {
+<span class="fc" id="L23">        jdbc.execute(</span>
+            &quot;CREATE TABLE IF NOT EXISTS books (&quot; +
+            &quot;id INT PRIMARY KEY, &quot; +
+            &quot;title VARCHAR(255) NOT NULL, &quot; +
+            &quot;author VARCHAR(255), &quot; +
+            &quot;price DOUBLE, &quot; +
+            &quot;stock INT DEFAULT 0, &quot; +
+            &quot;available BOOLEAN DEFAULT TRUE)&quot;
+        );
+<span class="fc" id="L32">    }</span>
+
+<span class="fc" id="L34">    private final RowMapper&lt;Book&gt; bookRowMapper = (rs, rowNum) -&gt; new Book(</span>
+<span class="fc" id="L35">        rs.getInt(&quot;id&quot;),</span>
+<span class="fc" id="L36">        rs.getString(&quot;title&quot;),</span>
+<span class="fc" id="L37">        rs.getString(&quot;author&quot;),</span>
+<span class="fc" id="L38">        rs.getDouble(&quot;price&quot;),</span>
+<span class="fc" id="L39">        rs.getInt(&quot;stock&quot;),</span>
+<span class="fc" id="L40">        rs.getBoolean(&quot;available&quot;)</span>
+    );
+
+    @Override
+    public void save(Book book) {
+<span class="fc" id="L45">        jdbc.update(</span>
+            &quot;INSERT INTO books (id, title, author, price, stock, available) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+<span class="fc" id="L47">            book.getId(), book.getTitle(), book.getAuthor(),</span>
+<span class="fc" id="L48">            book.getPrice(), book.getStock(), book.isAvailable()</span>
+        );
+<span class="fc" id="L50">    }</span>
+
+    @Override
+    public Optional&lt;Book&gt; findById(int id) {
+<span class="fc" id="L54">        List&lt;Book&gt; results = jdbc.query(</span>
+<span class="fc" id="L55">            &quot;SELECT * FROM books WHERE id = ?&quot;, bookRowMapper, id</span>
+        );
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));</span>
+    }
+
+    @Override
+    public boolean existsById(int id) {
+<span class="fc" id="L62">        Integer count = jdbc.queryForObject(</span>
+<span class="fc" id="L63">            &quot;SELECT COUNT(*) FROM books WHERE id = ?&quot;, Integer.class, id</span>
+        );
+<span class="pc bpc" id="L65" title="1 of 4 branches missed.">        return count != null &amp;&amp; count &gt; 0;</span>
+    }
+
+    @Override
+    public void updateStock(int id, int newStock) {
+<span class="fc" id="L70">        jdbc.update(</span>
+            &quot;UPDATE books SET stock = ?, available = ? WHERE id = ?&quot;,
+<span class="fc bfc" id="L72" title="All 2 branches covered.">            newStock, newStock &gt; 0, id</span>
+        );
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void deleteAll() {
+<span class="fc" id="L78">        jdbc.execute(&quot;TRUNCATE TABLE books&quot;);</span>
+<span class="fc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
